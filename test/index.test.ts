@@ -58,7 +58,7 @@ describe("keepalive extension", () => {
 		const { pi, ctx, handlers, arm, settle, texts } = setup();
 		const result = await arm(5);
 		expect(result.content[0].text).toContain("5 idle minutes");
-		expect(ctx.ui.setStatus).toHaveBeenLastCalledWith("pi-tiny-keepalive", "keepalive: 5m");
+		expect(ctx.ui.setStatus).toHaveBeenLastCalledWith("pi-tiny-keepalive", "keepalive:5m");
 
 		settle();
 		vi.advanceTimersByTime(5 * MINUTE - 1);

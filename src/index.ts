@@ -24,7 +24,7 @@ export default function piTinyKeepalive(pi: ExtensionAPI): void {
 	function setArmed(ctx: ExtensionContext, minutes: number | undefined): void {
 		idleMinutes = minutes;
 		stopTimer();
-		ctx.ui.setStatus(KEY, minutes === undefined ? undefined : `keepalive: ${minutes}m`);
+		ctx.ui.setStatus(KEY, minutes === undefined ? undefined : `keepalive:${minutes}m`);
 	}
 
 	function schedule(ctx: ExtensionContext): void {

@@ -18,7 +18,7 @@ keepalive: idle 30m, now 2026-10-04T08:42Z; last turn failed: 429 Too Many Reque
 
 The message only reports the wait; the model decides whether to continue or end its turn again. Any run resets the period, so monitor updates and other wake-ups delay the next keepalive. If the session is busy outside a run when the period ends, for example compacting, keepalive waits another period.
 
-The status line shows `keepalive: 30m` while armed.
+The status line shows `keepalive:30m` while armed.
 
 ## Disarming
 
