@@ -47,7 +47,7 @@ export default function piTinyKeepalive(pi: ExtensionAPI): void {
 		name: "keepalive",
 		label: "Keepalive",
 		description:
-			"Arms or disarms keepalive. Once armed, it stays on until you disarm it or the user sends a message or interrupts a turn. Each time the session has been idle for idle_minutes, whether you are waiting on background work or a turn failed, a keepalive message wakes you. Arm again to change idle_minutes.",
+			"Arms or disarms keepalive. Once armed, it stays on until you disarm it or the user sends a message or interrupts a turn. Each time the session has been idle for idle_minutes, a keepalive message wakes you.",
 		promptSnippet: "Wake this session up while working unattended",
 		promptGuidelines: [
 			"Arm keepalive when the user wants you to keep working without them; disarm it when the task is done or you need the user.",
@@ -61,10 +61,7 @@ export default function piTinyKeepalive(pi: ExtensionAPI): void {
 			}
 			const minutes = params.idle_minutes ?? DEFAULT_IDLE_MINUTES;
 			setArmed(ctx, minutes);
-			return {
-				content: [{ type: "text", text: `Keepalive armed: a keepalive message arrives after each ${minutes} idle minutes.` }],
-				details: undefined,
-			};
+			return { content: [{ type: "text", text: `Keepalive armed (${minutes} idle minutes).` }], details: undefined };
 		},
 	});
 
