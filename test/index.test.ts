@@ -50,7 +50,7 @@ describe("keepalive extension", () => {
 		expect(tool.name).toBe("keepalive");
 		expect(tool.parameters.required).toEqual(["action"]);
 		expect(pi.on.mock.calls.map(([name]) => name)).toEqual([
-			"input", "user_bash", "agent_start", "agent_end", "agent_settled", "session_start", "session_shutdown",
+			"input", "user_bash", "agent_start", "agent_end", "agent_settled", "session_shutdown",
 		]);
 	});
 
@@ -158,10 +158,6 @@ describe("keepalive extension", () => {
 		handlers.session_shutdown({}, ctx);
 		vi.advanceTimersByTime(10 * MINUTE);
 
-		await arm(5);
-		settle();
-		handlers.session_start({}, ctx);
-		vi.advanceTimersByTime(10 * MINUTE);
 		expect(pi.sendMessage).not.toHaveBeenCalled();
 	});
 });

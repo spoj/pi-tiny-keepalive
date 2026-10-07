@@ -16,24 +16,17 @@ export default function piTinyKeepalive(pi: ExtensionAPI): void {
 	let timer: ReturnType<typeof setTimeout> | undefined;
 	let failure: string | undefined;
 
-	function stopTimer(): void {
-		clearTimeout(timer);
-		timer = undefined;
-	}
-
 	function setArmed(ctx: ExtensionContext, minutes: number | undefined): void {
 		idleMinutes = minutes;
-		stopTimer();
+		clearTimeout(timer);
 		ctx.ui.setStatus(KEY, minutes === undefined ? undefined : `keepalive:${minutes}m`);
 	}
 
 	function schedule(ctx: ExtensionContext): void {
 		const minutes = idleMinutes;
-		stopTimer();
+		clearTimeout(timer);
 		if (minutes === undefined) return;
 		timer = setTimeout(() => {
-			timer = undefined;
-			if (idleMinutes === undefined) return;
 			// Work outside a run, such as compaction, ends without agent_settled, so try again later.
 			if (!ctx.isIdle()) return schedule(ctx);
 			const now = `${new Date().toISOString().slice(0, 16)}Z`;
@@ -55,35 +48,28 @@ export default function piTinyKeepalive(pi: ExtensionAPI): void {
 		],
 		parameters: keepaliveTool,
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-			if (params.action === "disarm") {
-				setArmed(ctx, undefined);
-				return { content: [{ type: "text", text: "Keepalive disarmed." }], details: undefined };
-			}
-			const minutes = params.idle_minutes ?? DEFAULT_IDLE_MINUTES;
+			const minutes = params.action === "arm" ? (params.idle_minutes ?? DEFAULT_IDLE_MINUTES) : undefined;
 			setArmed(ctx, minutes);
-			return { content: [{ type: "text", text: `Keepalive armed (${minutes} idle minutes).` }], details: undefined };
+			return { content: [{ type: "text", text: minutes ? `Keepalive armed (${minutes} idle minutes).` : "Keepalive disarmed." }], details: undefined };
 		},
 	});
 
 	// Interactive and RPC input comes from the user or a program acting as the user; extensions use source "extension".
 	pi.on("input", (event, ctx) => {
-		if (event.source !== "extension" && idleMinutes !== undefined) setArmed(ctx, undefined);
+		if (event.source !== "extension") setArmed(ctx, undefined);
 	});
-	pi.on("user_bash", (_event, ctx) => {
-		if (idleMinutes !== undefined) setArmed(ctx, undefined);
-	});
+	pi.on("user_bash", (_event, ctx) => setArmed(ctx, undefined));
 
-	pi.on("agent_start", () => stopTimer());
+	pi.on("agent_start", () => clearTimeout(timer));
 
 	pi.on("agent_end", (event, ctx) => {
 		// The run's signal marks a user interruption, including Escape during a tool call.
-		if (ctx.signal?.aborted && idleMinutes !== undefined) setArmed(ctx, undefined);
+		if (ctx.signal?.aborted) setArmed(ctx, undefined);
 		const last = event.messages.at(-1);
 		failure = last?.role === "assistant" && last.stopReason === "error" ? last.errorMessage : undefined;
 	});
 
 	pi.on("agent_settled", (_event, ctx) => schedule(ctx));
 
-	pi.on("session_start", (_event, ctx) => setArmed(ctx, undefined));
 	pi.on("session_shutdown", (_event, ctx) => setArmed(ctx, undefined));
 }
