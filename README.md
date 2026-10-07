@@ -1,5 +1,7 @@
 # pi-tiny-keepalive
 
+**Retired.** Monitor a `sleep` loop with [pi-tiny-monitor](https://github.com/spoj/pi-tiny-monitor) instead.
+
 A Pi package that lets the model keep an unattended session from stalling.
 
 A turn can end and leave the session idle with nobody to prompt it: Pi gave up retrying a provider error, a usage limit was hit, or the model ended its turn to wait for background work. Once armed, keepalive wakes the session after each idle period so the model can check on things and carry on.
